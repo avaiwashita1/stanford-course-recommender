@@ -21,6 +21,11 @@ export function SearchForm({ search }: { search: CourseSearch }) {
         </button>
       </div>
 
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="canTake" value="1" defaultChecked={search.canTakeOnly} />
+        Only courses I can take (hide ones I&apos;ve taken or am missing prerequisites for)
+      </label>
+
       <div className="grid gap-4 text-sm sm:grid-cols-3">
         <fieldset>
           <legend className="mb-1 font-medium text-gray-700">Quarter</legend>

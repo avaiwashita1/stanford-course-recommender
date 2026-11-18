@@ -13,7 +13,7 @@ Personalized, prerequisite-checked Stanford course recommendations and a conflic
 | 0 | Project setup + sign-in (email link; Google optional) | ✅ |
 | 1 | Catalog sync (ExploreCourses) + search with unit/day/quarter filters | ✅ code done; load data into Supabase (below) |
 | 2 | Transcript upload (parsed in the browser) + editable course list | ✅ run `0003_completed_courses.sql` |
-| 3 | Prerequisite parsing + eligibility checker | ⏳ |
+| 3 | Prerequisite parsing + eligibility checker | ✅ run `0004_prereq_rules.sql`, then `npm run parse-prereqs -- --upload` |
 | 4 | AI recommendations with explanations | ⏳ |
 | 5 | Planner + conflict-free recommendations + deploy | ⏳ |
 
@@ -56,9 +56,19 @@ Use a **personal Gmail account** if your Stanford account can't use Google Cloud
 ### 4. Student course lists
 Supabase → SQL Editor → run `supabase/migrations/0003_completed_courses.sql`. This creates the `completed_courses` table (course codes, titles and quarters only), with Row Level Security so each student sees only their own rows.
 
+### 5. Prerequisite rules
+1. Supabase → SQL Editor → run `supabase/migrations/0004_prereq_rules.sql`.
+2. `npm run parse-prereqs -- --upload` (needs `HOPSCOTCH_API_KEY` and `data/catalog.json`).
+
+How it works: an AI model (Claude Sonnet 5, one time) turns each course's prerequisite sentence into a rule ("all of these groups; any one option per group"). Its raw output is cached in `prereqs/rules.json` (committed), so re-runs only send new or changed text (~$3 for the whole catalog). Deterministic code then cleans the rules up (`src/lib/prereqs/normalize.ts`) and does all checking (`src/lib/prereqs/evaluate.ts`):
+- "recommended" preparation and corequisites are never enforced
+- "or consent of instructor", "or equivalent", knowledge requirements → **unverified** (shown with a label, never hidden)
+- requirements on courses not offered this year, stale rules, and ambiguous text → unverified
+- a course is hidden only when a clear course requirement is missing
+
 **Offline development:** after `npm run sync-catalog` (without `--upload`), set `CATALOG_SOURCE=local` and `DEV_SKIP_AUTH=true` in `.env.local` to browse the catalog with `npm run dev` without Supabase. Both settings are ignored in production builds (`DEV_SKIP_AUTH` only works under `npm run dev`).
 
-### 5. Vercel (free hosting)
+### 6. Vercel (free hosting)
 Import this GitHub repo at https://vercel.com/new, add the same environment variables, deploy, then add the Vercel URL to Supabase's Redirect URLs.
 
 ## Privacy
@@ -76,6 +86,9 @@ src/lib/catalog/             catalog parsing, filters, search (+ tests)
 scripts/sync-catalog.ts      downloads ExploreCourses → data/catalog.json → Supabase
 supabase/migrations/         SQL to paste into the Supabase SQL Editor
 src/lib/transcript/          transcript PDF → course list (runs in the browser) (+ tests)
+src/lib/prereqs/             prerequisite rules: AI prompt, clean-up, eligibility checker (+ tests)
+scripts/parse-prereqs.ts     one-time AI pass over prerequisite text → prereqs/rules.json → Supabase
+src/lib/ai/                  Claude client (via Hopscotch)
 src/app/(app)/courses/       course search page
 src/app/(app)/my-courses/    transcript upload + editable completed-course list
 src/app/login/               sign-in page

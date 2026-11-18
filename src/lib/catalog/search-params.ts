@@ -4,6 +4,8 @@ import type { CourseFilters } from "./filters";
 
 export interface CourseSearch extends CourseFilters {
   q: string;
+  /** Hide courses already taken or with missing prerequisites. */
+  canTakeOnly: boolean;
 }
 
 type Params = Record<string, string | string[] | undefined>;
@@ -25,6 +27,7 @@ export function parseCourseSearch(params: Params): CourseSearch {
     days: list(params.days).filter((d): d is Day => (DAYS as string[]).includes(d)),
     minUnits: num(params.min),
     maxUnits: num(params.max),
+    canTakeOnly: list(params.canTake)[0] === "1",
   };
 }
 

@@ -13,13 +13,12 @@ import type { CourseSearch } from "./search-params";
 import type { Course } from "./types";
 
 export interface SearchResult {
+  /** All matching courses, best first (the page decides how many to show). */
   courses: Course[];
-  total: number;
   /** True when the database returned its maximum, so `total` may be an undercount. */
   capped: boolean;
 }
 
-const MAX_RESULTS = 50;
 const SQL_LIMIT = 500;
 
 let localCatalog: Promise<Course[]> | null = null;
@@ -50,9 +49,5 @@ export async function searchCourses(search: CourseSearch): Promise<SearchResult>
   // Filters run in code (same logic for both sources). Units and terms are also
   // pre-filtered in SQL for speed; days can only be checked here.
   const matching = dedupeCrossListings(candidates.filter((c) => matchesFilters(c, search)));
-  return {
-    courses: matching.slice(0, MAX_RESULTS),
-    total: matching.length,
-    capped: !local && candidates.length >= SQL_LIMIT,
-  };
+  return { courses: matching, capped: !local && candidates.length >= SQL_LIMIT };
 }
