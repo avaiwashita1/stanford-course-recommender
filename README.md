@@ -45,7 +45,7 @@ Use a **personal Gmail account** if your Stanford account can't use Google Cloud
 4. Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` to show the button.
 
 ### 3. Course catalog
-1. Supabase → **SQL Editor** → New query → paste all of `supabase/migrations/0001_catalog.sql` → **Run**.
+1. Supabase → **SQL Editor** → New query → paste all of `supabase/migrations/0001_catalog.sql` → **Run**. (If you ran an earlier version of that file, also run `0002_catalog_grants.sql`.)
 2. Add `SUPABASE_SECRET_KEY` (Project Settings → API Keys → Secret keys) to `.env.local`. It's server-only: never expose it to the browser or commit it.
 3. Download the catalog and upload it:
    ```bash

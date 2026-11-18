@@ -69,3 +69,8 @@ as $$
            c.subject, c.code_num, c.code
   limit p_limit;
 $$;
+
+-- Table privileges (also in 0002_catalog_grants.sql, for projects that ran this file earlier).
+grant select on public.courses to authenticated;
+grant execute on function public.search_courses(text, text[], real, real, integer) to authenticated;
+grant select, insert, update, delete on public.courses to service_role;
