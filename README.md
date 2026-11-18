@@ -12,7 +12,7 @@ Personalized, prerequisite-checked Stanford course recommendations and a conflic
 |---|---|---|
 | 0 | Project setup + sign-in (email link; Google optional) | ✅ |
 | 1 | Catalog sync (ExploreCourses) + search with unit/day/quarter filters | ✅ code done; load data into Supabase (below) |
-| 2 | Transcript upload (parsed in the browser) + editable course list | ⏳ |
+| 2 | Transcript upload (parsed in the browser) + editable course list | ✅ run `0003_completed_courses.sql` |
 | 3 | Prerequisite parsing + eligibility checker | ⏳ |
 | 4 | AI recommendations with explanations | ⏳ |
 | 5 | Planner + conflict-free recommendations + deploy | ⏳ |
@@ -53,9 +53,12 @@ Use a **personal Gmail account** if your Stanford account can't use Google Cloud
    ```
    This fetches every department from ExploreCourses (~30 seconds, ~9,000 courses), saves `data/catalog.json`, and upserts it into the `courses` table. Re-run it whenever schedules change.
 
+### 4. Student course lists
+Supabase → SQL Editor → run `supabase/migrations/0003_completed_courses.sql`. This creates the `completed_courses` table (course codes, titles and quarters only), with Row Level Security so each student sees only their own rows.
+
 **Offline development:** after `npm run sync-catalog` (without `--upload`), set `CATALOG_SOURCE=local` and `DEV_SKIP_AUTH=true` in `.env.local` to browse the catalog with `npm run dev` without Supabase. Both settings are ignored in production builds (`DEV_SKIP_AUTH` only works under `npm run dev`).
 
-### 4. Vercel (free hosting)
+### 5. Vercel (free hosting)
 Import this GitHub repo at https://vercel.com/new, add the same environment variables, deploy, then add the Vercel URL to Supabase's Redirect URLs.
 
 ## Privacy
@@ -72,7 +75,9 @@ src/lib/auth/                email-domain check (+ tests)
 src/lib/catalog/             catalog parsing, filters, search (+ tests)
 scripts/sync-catalog.ts      downloads ExploreCourses → data/catalog.json → Supabase
 supabase/migrations/         SQL to paste into the Supabase SQL Editor
+src/lib/transcript/          transcript PDF → course list (runs in the browser) (+ tests)
 src/app/(app)/courses/       course search page
+src/app/(app)/my-courses/    transcript upload + editable completed-course list
 src/app/login/               sign-in page
 src/app/auth/callback/       where Google redirects back after sign-in
 ```

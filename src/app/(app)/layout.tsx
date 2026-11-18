@@ -15,6 +15,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-semibold text-[#8C1515]">
               Course Recommender
             </Link>
+            <Link href="/my-courses" className="text-gray-700 hover:text-black">
+              My courses
+            </Link>
             <Link href="/courses" className="text-gray-700 hover:text-black">
               Search courses
             </Link>
