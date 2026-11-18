@@ -34,7 +34,9 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
-  if (!signedIn && !isPublic) {
+  // Local development only: browse without signing in (never works in production builds).
+  const devSkip = process.env.NODE_ENV === "development" && process.env.DEV_SKIP_AUTH === "true";
+  if (!signedIn && !isPublic && !devSkip) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.search = "";

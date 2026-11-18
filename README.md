@@ -11,7 +11,7 @@ Personalized, prerequisite-checked Stanford course recommendations and a conflic
 | Step | What | Status |
 |---|---|---|
 | 0 | Project setup + sign-in (email link; Google optional) | ✅ |
-| 1 | Catalog sync (ExploreCourses) + search with unit/day filters | ⏳ |
+| 1 | Catalog sync (ExploreCourses) + search with unit/day/quarter filters | ✅ code done; load data into Supabase (below) |
 | 2 | Transcript upload (parsed in the browser) + editable course list | ⏳ |
 | 3 | Prerequisite parsing + eligibility checker | ⏳ |
 | 4 | AI recommendations with explanations | ⏳ |
@@ -44,7 +44,18 @@ Use a **personal Gmail account** if your Stanford account can't use Google Cloud
 3. Copy the Client ID and Client Secret into Supabase → Authentication → Sign In / Providers → **Google**, and enable it.
 4. Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` to show the button.
 
-### 3. Vercel (free hosting)
+### 3. Course catalog
+1. Supabase → **SQL Editor** → New query → paste all of `supabase/migrations/0001_catalog.sql` → **Run**.
+2. Add `SUPABASE_SECRET_KEY` (Project Settings → API Keys → Secret keys) to `.env.local`. It's server-only: never expose it to the browser or commit it.
+3. Download the catalog and upload it:
+   ```bash
+   npm run sync-catalog -- --upload
+   ```
+   This fetches every department from ExploreCourses (~30 seconds, ~9,000 courses), saves `data/catalog.json`, and upserts it into the `courses` table. Re-run it whenever schedules change.
+
+**Offline development:** after `npm run sync-catalog` (without `--upload`), set `CATALOG_SOURCE=local` and `DEV_SKIP_AUTH=true` in `.env.local` to browse the catalog with `npm run dev` without Supabase. Both settings are ignored in production builds (`DEV_SKIP_AUTH` only works under `npm run dev`).
+
+### 4. Vercel (free hosting)
 Import this GitHub repo at https://vercel.com/new, add the same environment variables, deploy, then add the Vercel URL to Supabase's Redirect URLs.
 
 ## Privacy
@@ -58,6 +69,10 @@ Import this GitHub repo at https://vercel.com/new, add the same environment vari
 src/proxy.ts                 runs before every request: refreshes session, redirects signed-out users
 src/lib/supabase/            Supabase clients for browser, server and proxy
 src/lib/auth/                email-domain check (+ tests)
+src/lib/catalog/             catalog parsing, filters, search (+ tests)
+scripts/sync-catalog.ts      downloads ExploreCourses → data/catalog.json → Supabase
+supabase/migrations/         SQL to paste into the Supabase SQL Editor
+src/app/(app)/courses/       course search page
 src/app/login/               sign-in page
 src/app/auth/callback/       where Google redirects back after sign-in
 ```

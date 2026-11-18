@@ -44,3 +44,6 @@ next-env.d.ts
 # Never commit real transcripts or other student data
 *.pdf
 private/
+
+# Downloaded catalog (regenerate with npm run sync-catalog)
+/data/

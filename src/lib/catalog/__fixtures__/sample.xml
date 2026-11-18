@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <deprecated>false</deprecated>
+  <courses>
+    <course>
+      <year>2026-2027</year>
+      <subject>CS</subject>
+      <code>161</code>
+      <title>Design and Analysis of Algorithms</title>
+      <description>Worst and average case analysis. Prerequisite: 106B or 106X; 103 or 103B; 109 or STATS 116.</description>
+      <gers>GER:DB-EngrAppSci, WAY-FR</gers>
+      <repeatable>false</repeatable>
+      <grading>Letter or Credit/No Credit</grading>
+      <unitsMin>3</unitsMin>
+      <unitsMax>5</unitsMax>
+      <sections>
+        <section>
+          <classId>1933</classId>
+          <term>2026-2027 Winter</term>
+          <units>3-5</units>
+          <sectionNumber>01</sectionNumber>
+          <component>LEC</component>
+          <notes>May be taken for 3 units by graduate students.</notes>
+          <schedules>
+            <schedule>
+              <startTime>1:30:00 PM</startTime>
+              <endTime>2:50:00 PM</endTime>
+              <location>Packrd101</location>
+              <days>
+
+                Monday
+
+                Wednesday
+
+                Friday
+
+              </days>
+              <instructors>
+                <instructor><firstName>Aviad</firstName><lastName>Rubinstein</lastName></instructor>
+              </instructors>
+            </schedule>
+          </schedules>
+        </section>
+        <section>
+          <classId>2000</classId>
+          <term>2026-2027 Winter</term>
+          <units></units>
+          <sectionNumber>02</sectionNumber>
+          <component>DIS</component>
+          <notes></notes>
+          <schedules>
+            <schedule>
+              <startTime>3:30:00 PM</startTime>
+              <endTime>4:20:00 PM</endTime>
+              <location></location>
+              <days>Thursday</days>
+              <instructors></instructors>
+            </schedule>
+          </schedules>
+        </section>
+        <section>
+          <classId>2001</classId>
+          <term>2026-2027 Spring</term>
+          <units>3-5</units>
+          <sectionNumber>01</sectionNumber>
+          <component>LEC</component>
+          <notes></notes>
+          <schedules>
+            <schedule>
+              <startTime></startTime>
+              <endTime></endTime>
+              <location></location>
+              <days></days>
+              <instructors></instructors>
+            </schedule>
+          </schedules>
+        </section>
+      </sections>
+      <administrativeInformation><courseId>105687</courseId></administrativeInformation>
+    </course>
+    <course>
+      <year>2026-2027</year>
+      <subject>CS</subject>
+      <code>199</code>
+      <title>Independent Work</title>
+      <description>Special study under faculty direction.</description>
+      <gers></gers>
+      <repeatable>true</repeatable>
+      <grading>Satisfactory/No Credit</grading>
+      <unitsMin>1</unitsMin>
+      <unitsMax>6</unitsMax>
+      <sections>
+        <section>
+          <classId>3000</classId>
+          <term>2026-2027 Autumn</term>
+          <units>1-6</units>
+          <sectionNumber>01</sectionNumber>
+          <component>INS</component>
+          <notes></notes>
+          <schedules><schedule><startTime></startTime><endTime></endTime><location></location><days></days><instructors></instructors></schedule></schedules>
+        </section>
+      </sections>
+      <administrativeInformation><courseId>1</courseId></administrativeInformation>
+    </course>
+  </courses>
+</xml>
