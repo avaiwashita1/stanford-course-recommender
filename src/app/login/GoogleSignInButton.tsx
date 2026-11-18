@@ -23,7 +23,7 @@ export function GoogleSignInButton() {
     <button
       onClick={signIn}
       disabled={loading}
-      className="w-full rounded-lg bg-[#8C1515] px-4 py-3 font-medium text-white hover:bg-[#6f1010] disabled:opacity-60"
+      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-60"
     >
       {loading ? "Redirecting to Google…" : "Sign in with Google"}
     </button>

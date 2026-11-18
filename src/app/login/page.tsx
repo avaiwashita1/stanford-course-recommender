@@ -1,10 +1,14 @@
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { MagicLinkForm } from "./MagicLinkForm";
 
 const ERRORS: Record<string, string> = {
-  domain_not_allowed: "Please sign in with your @stanford.edu Google account.",
-  sign_in_failed: "Sign-in failed. Please try again.",
+  domain_not_allowed: "Please sign in with your @stanford.edu account.",
+  sign_in_failed: "Sign-in failed or the link expired. Please try again.",
   missing_code: "Sign-in was interrupted. Please try again.",
 };
+
+// Google sign-in is hidden until its Google Cloud setup is done (see README).
+const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error } = await searchParams;
@@ -22,7 +26,15 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         {message && (
           <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{message}</p>
         )}
-        <GoogleSignInButton />
+        <MagicLinkForm />
+        {googleEnabled && (
+          <>
+            <div className="flex items-center gap-3 text-xs text-gray-400">
+              <div className="h-px flex-1 bg-gray-200" /> or <div className="h-px flex-1 bg-gray-200" />
+            </div>
+            <GoogleSignInButton />
+          </>
+        )}
       </div>
     </main>
   );
