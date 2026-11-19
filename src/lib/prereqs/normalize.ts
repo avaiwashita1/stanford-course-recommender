@@ -3,8 +3,8 @@
 //  - normalizes course codes; anything that isn't a valid code becomes an "other" condition
 //  - adds cross-listed equivalents (CS 229 also accepts STATS 229)
 //  - turns codes like "PWR 1" (not a course, but PWR 1LS, PWR 1AB, ... exist) into a "family"
-//  - for courses not offered this year (e.g. a renumbered course), adds an "equivalent" option
-//    so the course is shown as unverified instead of being hidden
+//  - when NONE of a group's courses is offered this year (e.g. only a renumbered course is
+//    listed), adds an "equivalent" option so the course is shown as unverified, not hidden
 //  - drops groups that list a corequisite (those may be taken at the same time)
 import { normalizeCourseCode } from "@/lib/catalog/code";
 import type { AiPrereqRule, PrereqOption, PrereqRule } from "./schema";
@@ -28,6 +28,7 @@ export function normalizeRule(rule: AiPrereqRule, catalog: CatalogIndex): Prereq
     .map((g) => {
       const seen = new Set<string>();
       const options: PrereqOption[] = [];
+      const notOffered: string[] = [];
       const add = (o: PrereqOption) => {
         const key = `${o.kind}:${o.value.toLowerCase()}`;
         if (!o.value.trim() || seen.has(key)) return;
@@ -46,8 +47,13 @@ export function normalizeRule(rule: AiPrereqRule, catalog: CatalogIndex): Prereq
           add({ kind: "family", value: code });
         } else {
           add({ kind: "course", value: code });
-          add({ kind: "other", value: `equivalent (${code} isn't offered this year)` });
+          notOffered.push(code);
         }
+      }
+      // Only if no alternative in this group can be taken/verified today.
+      const hasCurrentAlternative = options.some((o) => (o.kind === "course" && catalog.ids.has(o.value)) || o.kind === "family");
+      if (notOffered.length && !hasCurrentAlternative) {
+        add({ kind: "other", value: `equivalent (${notOffered.join(", ")} not offered this year)` });
       }
       return { anyOf: options };
     })

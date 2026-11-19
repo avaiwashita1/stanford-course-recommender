@@ -41,9 +41,14 @@ describe("normalizeRule", () => {
     expect(r.groups).toEqual([{ anyOf: [{ kind: "family", value: "PWR 1" }] }]);
   });
 
-  it("adds an equivalent option for courses not offered this year", () => {
+  it("adds an equivalent option when no listed course is offered this year", () => {
     const r = normalizeRule(rule([{ anyOf: [course("CS 110")] }]), catalog);
-    expect(r.groups[0].anyOf).toEqual([course("CS 110"), { kind: "other", value: "equivalent (CS 110 isn't offered this year)" }]);
+    expect(r.groups[0].anyOf).toEqual([course("CS 110"), { kind: "other", value: "equivalent (CS 110 not offered this year)" }]);
+  });
+
+  it("does not loosen a group that still has an offered alternative", () => {
+    const r = normalizeRule(rule([{ anyOf: [course("CS 106B"), course("CS 106X")] }]), catalog);
+    expect(r.groups[0].anyOf).toEqual([course("CS 106B"), course("CS 106X")]);
   });
 
   it("drops groups that are corequisites", () => {

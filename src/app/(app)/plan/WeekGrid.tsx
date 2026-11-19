@@ -19,7 +19,7 @@ export function WeekGrid({ entries }: { entries: PlannedEntry[] }) {
   const hours = Array.from({ length: (last - first) / 60 + 1 }, (_, i) => first + i * 60);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto pb-3">
       <div className="grid min-w-[480px] grid-cols-[40px_repeat(5,1fr)] text-xs">
         <div />
         {DAYS.map((d) => <div key={d} className="pb-1 text-center font-medium text-gray-600">{d}</div>)}

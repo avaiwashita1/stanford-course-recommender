@@ -15,7 +15,7 @@ Personalized, prerequisite-checked Stanford course recommendations and a conflic
 | 2 | Transcript upload (parsed in the browser) + editable course list | ✅ run `0003_completed_courses.sql` |
 | 3 | Prerequisite parsing + eligibility checker | ✅ run `0004_prereq_rules.sql`, then `npm run parse-prereqs -- --upload` |
 | 4 | AI recommendations with explanations | ✅ needs `HOPSCOTCH_API_KEY` in production |
-| 5 | Planner + conflict-free recommendations + deploy | ⏳ |
+| 5 | Planner + conflict-free recommendations + daily limit | ✅ run `0005_plan_and_limits.sql`; deploy below |
 
 ## Local setup
 
@@ -71,9 +71,18 @@ Set `HOPSCOTCH_API_KEY` (server-side only; also in Vercel's environment variable
 
 Pipeline (`src/lib/recommend/pipeline.ts`): AI turns the interests text into search phrases → Postgres full-text search with the student's filters → code drops courses already taken or with missing prerequisites (max 60 left) → AI ranks up to 10 and writes "why it fits" → code discards any pick that isn't in the eligible list. Only the interests text and public catalog data are sent to the AI, never the student's course list. Roughly 3–5¢ and ~20 seconds per request.
 
+### 7. Planner
+Supabase → SQL Editor → run `supabase/migrations/0005_plan_and_limits.sql`. Students add courses (with a chosen lecture/seminar section) from search or recommendations. Code (`src/lib/plan/`, `src/lib/prereqs/annotate.ts`) then:
+- blocks sections that overlap a planned course in the same quarter (server re-checks on save)
+- counts courses planned in **earlier** quarters toward prerequisites (CS 106B in Autumn → CS 107 eligible in Winter)
+- hides planned and clashing courses from "Only courses I can take" and recommendations
+- limits recommendation requests per student (`RECOMMEND_DAILY_LIMIT`, default 20 per 24 hours)
+
+Not yet handled: discussion/lab sections (only the lecture/seminar time is checked), and sections whose times are TBA (they never count as conflicts).
+
 **Offline development:** after `npm run sync-catalog` (without `--upload`), set `CATALOG_SOURCE=local` and `DEV_SKIP_AUTH=true` in `.env.local` to browse the catalog with `npm run dev` without Supabase. Both settings are ignored in production builds (`DEV_SKIP_AUTH` only works under `npm run dev`).
 
-### 7. Vercel (free hosting)
+### 8. Vercel (free hosting)
 Import this GitHub repo at https://vercel.com/new, add the same environment variables, deploy, then add the Vercel URL to Supabase's Redirect URLs.
 
 ## Privacy
@@ -96,6 +105,8 @@ scripts/parse-prereqs.ts     one-time AI pass over prerequisite text → prereqs
 src/lib/ai/                  Claude client (via Hopscotch)
 src/lib/recommend/           recommendation pipeline + prompts (+ tests)
 src/app/(app)/recommend/     recommendations page
+src/lib/plan/                time conflicts, plan validation, plan data (+ tests)
+src/app/(app)/plan/          My plan page, Add-to-plan control
 src/app/(app)/courses/       course search page
 src/app/(app)/my-courses/    transcript upload + editable completed-course list
 src/app/login/               sign-in page

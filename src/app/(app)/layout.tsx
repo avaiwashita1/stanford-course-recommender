@@ -10,8 +10,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex flex-1 flex-col">
       <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3">
-          <nav className="flex items-center gap-5 text-sm">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <Link href="/" className="font-semibold text-[#8C1515]">
               Course Recommender
             </Link>
