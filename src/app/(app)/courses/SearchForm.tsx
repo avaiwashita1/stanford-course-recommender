@@ -23,7 +23,7 @@ export function SearchForm({ search }: { search: CourseSearch }) {
 
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="canTake" value="1" defaultChecked={search.canTakeOnly} />
-        Only courses I can take (hide ones I&apos;ve taken or am missing prerequisites for)
+        Only courses I can take (hide ones I&apos;ve taken or planned, am missing prerequisites for, or that clash with my plan)
       </label>
 
       <div className="grid gap-4 text-sm sm:grid-cols-3">

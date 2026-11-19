@@ -5,9 +5,8 @@ import { parseCourseSearch } from "@/lib/catalog/search-params";
 import { getPrereqRules } from "@/lib/prereqs/repository";
 import { generateKeywords, rankCandidates } from "@/lib/recommend/ai";
 import { recommend, type RecommendResult } from "@/lib/recommend/pipeline";
+import { getStudentContext, tryUseRecommendation } from "@/lib/plan/repository";
 import { createClient } from "@/lib/supabase/server";
-import { COUNTED_STATUSES } from "@/lib/transcript/parse";
-import { getMyCourses } from "@/lib/transcript/repository";
 
 /** What the student typed and picked, echoed back so the form keeps it after submitting. */
 export interface RecommendFormValues {
@@ -25,6 +24,7 @@ export type RecommendState =
 
 const MIN_CHARS = 10;
 const MAX_CHARS = 1000;
+const DAILY_LIMIT = Number(process.env.RECOMMEND_DAILY_LIMIT ?? 20);
 
 export async function getRecommendations(_prev: RecommendState, formData: FormData): Promise<RecommendState> {
   const interests = String(formData.get("interests") ?? "").trim();
@@ -45,7 +45,8 @@ export async function getRecommendations(_prev: RecommendState, formData: FormDa
   // Server actions are public endpoints: re-check sign-in here, not just in the proxy.
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
-  if (!data?.claims && !(process.env.NODE_ENV === "development" && process.env.DEV_SKIP_AUTH === "true")) {
+  const devSkip = process.env.NODE_ENV === "development" && process.env.DEV_SKIP_AUTH === "true";
+  if (!data?.claims && !devSkip) {
     return { status: "error", message: "Please sign in again.", form };
   }
 
@@ -54,10 +55,12 @@ export async function getRecommendations(_prev: RecommendState, formData: FormDa
   const { terms, days, minUnits, maxUnits } = parseCourseSearch(params);
 
   try {
-    const myCourses = await getMyCourses();
-    const completed = new Set(myCourses.filter((c) => COUNTED_STATUSES.includes(c.status)).map((c) => c.courseId));
+    if (!devSkip && !(await tryUseRecommendation(DAILY_LIMIT))) {
+      return { status: "error", message: `You've reached today's limit of ${DAILY_LIMIT} recommendation requests. Please try again tomorrow.`, form };
+    }
+    const student = await getStudentContext();
     const result = await recommend(
-      { interests, filters: { terms, days, minUnits, maxUnits }, completed },
+      { interests, filters: { terms, days, minUnits, maxUnits }, student },
       { generateKeywords, searchCandidates, getRules: getPrereqRules, rank: rankCandidates },
     );
     return { status: "done", result, form };

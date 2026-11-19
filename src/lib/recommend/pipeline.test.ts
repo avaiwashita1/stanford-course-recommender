@@ -31,7 +31,7 @@ function deps(overrides: Partial<RecommendDeps> = {}): RecommendDeps {
 describe("recommend", () => {
   it("only sends eligible, untaken courses to the AI and keeps only valid picks", async () => {
     const d = deps();
-    const result = await recommend({ interests: "ML", filters: {}, completed: new Set(["CS 106B"]) }, d);
+    const result = await recommend({ interests: "ML", filters: {}, student: { completed: new Set(["CS 106B"]), planned: [] } }, d);
 
     const sent = (d.rank as ReturnType<typeof vi.fn>).mock.calls[0][1].map((c: { courseId: string }) => c.courseId);
     expect(sent).toEqual(["CS 229"]); // CS 111 missing CS 107, CS 106B already taken
@@ -42,7 +42,7 @@ describe("recommend", () => {
 
   it("skips the ranking call when nothing is eligible", async () => {
     const d = deps({ searchCandidates: vi.fn(async () => []) });
-    const result = await recommend({ interests: "x", filters: {}, completed: new Set() }, d);
+    const result = await recommend({ interests: "x", filters: {}, student: { completed: new Set(), planned: [] } }, d);
     expect(result.recommendations).toEqual([]);
     expect(d.rank).not.toHaveBeenCalled();
   });

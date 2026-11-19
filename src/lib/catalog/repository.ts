@@ -70,3 +70,16 @@ export async function searchCandidates(phrases: string[], filters: CourseFilters
   }
   return dedupeCrossListings(candidates.filter((c) => matchesFilters(c, filters)));
 }
+
+/** Full catalog rows for specific course codes (e.g. the courses in a student's plan). */
+export async function getCoursesByIds(ids: string[]): Promise<Map<string, Course>> {
+  if (ids.length === 0) return new Map();
+  if (process.env.CATALOG_SOURCE === "local") {
+    const all = await loadLocalCatalog();
+    return new Map(all.filter((c) => ids.includes(c.id)).map((c) => [c.id, c]));
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("courses").select("*").in("id", ids);
+  if (error) throw new Error(`Couldn't load courses: ${error.message}`);
+  return new Map((data as CourseRow[]).map((r) => [r.id, rowToCourse(r)]));
+}

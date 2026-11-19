@@ -2,8 +2,7 @@ import { searchCourses } from "@/lib/catalog/repository";
 import { hasAnyCriteria, parseCourseSearch } from "@/lib/catalog/search-params";
 import { annotateCourses, canTake } from "@/lib/prereqs/annotate";
 import { getPrereqRules } from "@/lib/prereqs/repository";
-import { COUNTED_STATUSES } from "@/lib/transcript/parse";
-import { getMyCourses } from "@/lib/transcript/repository";
+import { getStudentContext } from "@/lib/plan/repository";
 import Link from "next/link";
 import { CourseCard } from "./CourseCard";
 import { SearchForm } from "./SearchForm";
@@ -14,10 +13,15 @@ export default async function CoursesPage({ searchParams }: PageProps<"/courses"
   const search = parseCourseSearch(await searchParams);
   const show = hasAnyCriteria(search);
 
-  const [result, myCourses] = await Promise.all([show ? searchCourses(search) : null, getMyCourses()]);
-  const completed = new Set(myCourses.filter((c) => COUNTED_STATUSES.includes(c.status)).map((c) => c.courseId));
+  const [result, student] = await Promise.all([show ? searchCourses(search) : null, getStudentContext()]);
+  const completed = student.completed;
 
-  let annotated = result ? annotateCourses(result.courses, await getPrereqRules(result.courses.map((c) => c.id)), completed) : [];
+  let annotated = result
+    ? annotateCourses(result.courses, await getPrereqRules(result.courses.map((c) => c.id)), student, {
+        terms: search.terms,
+        days: search.days,
+      })
+    : [];
   if (search.canTakeOnly) annotated = annotated.filter(canTake);
   const total = annotated.length;
   const visible = annotated.slice(0, PAGE_SIZE);

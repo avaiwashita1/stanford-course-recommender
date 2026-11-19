@@ -1,5 +1,6 @@
 import { formatUnits, scheduleSummary } from "@/lib/catalog/format";
 import type { AnnotatedCourse } from "@/lib/prereqs/annotate";
+import { AddToPlan } from "../plan/AddToPlan";
 
 const BADGES = {
   taken: { label: "Already taken", className: "bg-gray-100 text-gray-700" },
@@ -61,6 +62,16 @@ export function CourseCard({
           </li>
         ))}
       </ul>
+
+      {annotated.conflictTerms.length > 0 && !annotated.plannedTerm && (
+        <p className="text-xs text-amber-800">
+          Every section clashes with your plan in {annotated.conflictTerms.join(", ")}.
+        </p>
+      )}
+
+      {!annotated.alreadyTaken && (
+        <AddToPlan courseId={course.id} options={annotated.options} plannedTerm={annotated.plannedTerm} />
+      )}
 
       <details className="text-sm text-gray-700">
         <summary className="cursor-pointer text-gray-500 hover:text-gray-800">Description & prerequisites</summary>

@@ -5,6 +5,7 @@ import { formatUnits } from "@/lib/catalog/format";
 import type { CourseFilters } from "@/lib/catalog/filters";
 import type { Course } from "@/lib/catalog/types";
 import { annotateCourses, canTake, type AnnotatedCourse } from "@/lib/prereqs/annotate";
+import type { StudentContext } from "@/lib/plan/types";
 import type { StoredPrereqRule } from "@/lib/prereqs/schema";
 import type { RankCandidate, Ranked } from "./ai";
 
@@ -15,7 +16,7 @@ const DESCRIPTION_CHARS = 350;
 export interface RecommendInput {
   interests: string;
   filters: CourseFilters;
-  completed: ReadonlySet<string>;
+  student: StudentContext;
 }
 
 export interface RecommendDeps {
@@ -55,7 +56,9 @@ export async function recommend(input: RecommendInput, deps: RecommendDeps): Pro
 
   const found = await deps.searchCandidates(keywords, input.filters);
   const rules = await deps.getRules(found.map((c) => c.id));
-  const eligible = annotateCourses(found, rules, input.completed).filter(canTake).slice(0, MAX_CANDIDATES);
+  const eligible = annotateCourses(found, rules, input.student, { terms: input.filters.terms, days: input.filters.days })
+    .filter(canTake)
+    .slice(0, MAX_CANDIDATES);
   if (eligible.length === 0) return { recommendations: [], keywords, candidateCount: 0 };
 
   const ranked = await deps.rank(input.interests, eligible.map((a) => toRankCandidate(a.course)));

@@ -18,6 +18,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <Link href="/recommend" className="text-gray-700 hover:text-black">
               Recommendations
             </Link>
+            <Link href="/plan" className="text-gray-700 hover:text-black">
+              My plan
+            </Link>
             <Link href="/my-courses" className="text-gray-700 hover:text-black">
               My courses
             </Link>
