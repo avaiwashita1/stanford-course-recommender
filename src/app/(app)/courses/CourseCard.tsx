@@ -30,7 +30,9 @@ export function CourseCard({ annotated, showEligibility }: { annotated: Annotate
       {showEligibility && (
         <p className="text-sm">
           <span className={`mr-2 rounded px-1.5 py-0.5 text-xs font-medium ${badge.className}`}>{badge.label}</span>
-          {!annotated.alreadyTaken && <span className="text-gray-700">{annotated.explanation}</span>}
+          {!annotated.alreadyTaken && annotated.eligibility !== "no_prereqs" && (
+            <span className="text-gray-700">{annotated.explanation}</span>
+          )}
         </p>
       )}
 
