@@ -9,6 +9,7 @@ import { dedupeCrossListings } from "./cross-listings";
 import { matchesFilters } from "./filters";
 import { searchLocal } from "./local-search";
 import { rowToCourse, type CourseRow } from "./rows";
+import type { CourseFilters } from "./filters";
 import type { CourseSearch } from "./search-params";
 import type { Course } from "./types";
 
@@ -50,4 +51,22 @@ export async function searchCourses(search: CourseSearch): Promise<SearchResult>
   // pre-filtered in SQL for speed; days can only be checked here.
   const matching = dedupeCrossListings(candidates.filter((c) => matchesFilters(c, search)));
   return { courses: matching, capped: !local && candidates.length >= SQL_LIMIT };
+}
+
+/**
+ * Courses matching ANY of the phrases (and the filters), best text match first.
+ * Used by recommendations. Cross-listings are collapsed.
+ */
+export async function searchCandidates(phrases: string[], filters: CourseFilters): Promise<Course[]> {
+  let candidates: Course[];
+  if (process.env.CATALOG_SOURCE === "local") {
+    const all = await loadLocalCatalog();
+    const seen = new Set<string>();
+    candidates = phrases.flatMap((p) => searchLocal(all, p)).filter((c) => !seen.has(c.id) && seen.add(c.id));
+  } else {
+    // Postgres "websearch" syntax: "machine learning" or robotics or ...
+    const q = phrases.map((p) => (p.includes(" ") ? `"${p.replace(/"/g, "")}"` : p)).join(" or ");
+    candidates = await candidatesFromSupabase({ q, canTakeOnly: false, ...filters });
+  }
+  return dedupeCrossListings(candidates.filter((c) => matchesFilters(c, filters)));
 }

@@ -9,7 +9,16 @@ const BADGES = {
   missing: { label: "✗ Missing prerequisites", className: "bg-red-100 text-red-800" },
 } as const;
 
-export function CourseCard({ annotated, showEligibility }: { annotated: AnnotatedCourse; showEligibility: boolean }) {
+export function CourseCard({
+  annotated,
+  showEligibility,
+  reason,
+}: {
+  annotated: AnnotatedCourse;
+  showEligibility: boolean;
+  /** AI explanation of why this course matches the student's interests. */
+  reason?: string;
+}) {
   const { course } = annotated;
   const schedule = scheduleSummary(course);
   const badge = annotated.alreadyTaken ? BADGES.taken : BADGES[annotated.eligibility];
@@ -25,6 +34,13 @@ export function CourseCard({ annotated, showEligibility }: { annotated: Annotate
 
       {course.crossListings.length > 0 && (
         <p className="text-xs text-gray-500">Also listed as {course.crossListings.join(", ")}</p>
+      )}
+
+      {reason && (
+        <p className="rounded-md bg-[#8C1515]/5 px-3 py-2 text-sm text-gray-800">
+          <span className="font-medium text-[#8C1515]">Why it fits: </span>
+          {reason}
+        </p>
       )}
 
       {showEligibility && (

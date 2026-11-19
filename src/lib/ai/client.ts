@@ -16,4 +16,5 @@ export function createClaudeClient(): Anthropic {
 /** Models are named "provider/model" on Hopscotch. */
 export const MODELS = {
   prereqParser: process.env.PREREQ_MODEL ?? "anthropic/claude-sonnet-5",
+  recommender: process.env.RECOMMEND_MODEL ?? "anthropic/claude-sonnet-5",
 } as const;

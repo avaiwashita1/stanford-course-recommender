@@ -14,7 +14,7 @@ Personalized, prerequisite-checked Stanford course recommendations and a conflic
 | 1 | Catalog sync (ExploreCourses) + search with unit/day/quarter filters | ✅ code done; load data into Supabase (below) |
 | 2 | Transcript upload (parsed in the browser) + editable course list | ✅ run `0003_completed_courses.sql` |
 | 3 | Prerequisite parsing + eligibility checker | ✅ run `0004_prereq_rules.sql`, then `npm run parse-prereqs -- --upload` |
-| 4 | AI recommendations with explanations | ⏳ |
+| 4 | AI recommendations with explanations | ✅ needs `HOPSCOTCH_API_KEY` in production |
 | 5 | Planner + conflict-free recommendations + deploy | ⏳ |
 
 ## Local setup
@@ -66,9 +66,14 @@ How it works: an AI model (Claude Sonnet 5, one time) turns each course's prereq
 - requirements on courses not offered this year, stale rules, and ambiguous text → unverified
 - a course is hidden only when a clear course requirement is missing
 
+### 6. Recommendations
+Set `HOPSCOTCH_API_KEY` (server-side only; also in Vercel's environment variables). `RECOMMEND_MODEL` defaults to `anthropic/claude-sonnet-5`.
+
+Pipeline (`src/lib/recommend/pipeline.ts`): AI turns the interests text into search phrases → Postgres full-text search with the student's filters → code drops courses already taken or with missing prerequisites (max 60 left) → AI ranks up to 10 and writes "why it fits" → code discards any pick that isn't in the eligible list. Only the interests text and public catalog data are sent to the AI, never the student's course list. Roughly 3–5¢ and ~20 seconds per request.
+
 **Offline development:** after `npm run sync-catalog` (without `--upload`), set `CATALOG_SOURCE=local` and `DEV_SKIP_AUTH=true` in `.env.local` to browse the catalog with `npm run dev` without Supabase. Both settings are ignored in production builds (`DEV_SKIP_AUTH` only works under `npm run dev`).
 
-### 6. Vercel (free hosting)
+### 7. Vercel (free hosting)
 Import this GitHub repo at https://vercel.com/new, add the same environment variables, deploy, then add the Vercel URL to Supabase's Redirect URLs.
 
 ## Privacy
@@ -89,6 +94,8 @@ src/lib/transcript/          transcript PDF → course list (runs in the browser
 src/lib/prereqs/             prerequisite rules: AI prompt, clean-up, eligibility checker (+ tests)
 scripts/parse-prereqs.ts     one-time AI pass over prerequisite text → prereqs/rules.json → Supabase
 src/lib/ai/                  Claude client (via Hopscotch)
+src/lib/recommend/           recommendation pipeline + prompts (+ tests)
+src/app/(app)/recommend/     recommendations page
 src/app/(app)/courses/       course search page
 src/app/(app)/my-courses/    transcript upload + editable completed-course list
 src/app/login/               sign-in page
